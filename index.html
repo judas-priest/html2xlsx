@@ -1,297 +1,542 @@
-
 <!doctype html>
 <html lang="ru">
-
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HTML 2 XLSX</title>
-    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        .header {
-            background-color: #4caf50;
-            color: white;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .row-even {
-            background-color: #f2f2f2;
-        }
-
-        .row-odd {
-            background-color: #ffffff;
-        }
-
-        .highlight {
-            background-color: #ffeb3b;
-            font-weight: bold;
-        }
-
-        .warning {
-            background-color: #ff9800;
-            color: white;
-        }
-
-        .success {
-            background-color: #8bc34a;
-            color: white;
-        }
-
-        button {
-            padding: 10px 20px;
-            background-color: #2196f3;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 5px;
-        }
-
-        button:hover {
-            background-color: #0b7dda;
-        }
-
-        .table-selector {
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f5f5f5;
-            border-radius: 4px;
-        }
-
-        .table-selector select {
-            padding: 8px;
-            font-size: 16px;
-            margin-right: 10px;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="table-selector">
-        <label for="tableSelect">Выберите таблицу:</label>
-        <select id="tableSelect" onchange="changeTable()">
-            <option value="sales">Отчет по продажам</option>
-            <option value="metal">Хэви метал группы</option>
-        </select>
-    </div>
-
-    <table id="dataTable"></table>
-
-    <button onclick="convertTableToExcel('dataTable')">Экспорт в Excel</button>
-    <script>
-        const tables = {
-            "sales": {
-                "title": "Отчет по продажам за 2024 год",
-                "headers": ["Месяц", "Товар", "Количество", "Цена за единицу", "Общая сумма"],
-                "rows": [
-                    { "values": ["Январь", "Ноутбук", 15, 50000, 750000], "class": "row-odd" },
-                    { "values": ["Январь", "Мышь", 45, 1500, 67500], "class": "row-even" },
-                    { "values": ["Февраль", "Монитор", 8, 25000, 200000], "class": "row-odd" },
-                    { "values": ["Февраль", "Клавиатура", 25, 3000, 75000], "class": "row-even" },
-                    { "values": ["Март", "Ноутбук", 22, 50000, 1100000], "class": "row-odd highlight" },
-                    { "values": ["Март", "Наушники", 30, 5000, 150000], "class": "row-even" },
-                    { "values": ["Апрель", "Планшет", 5, 35000, 175000], "class": "row-odd warning" },
-                    { "values": ["Апрель", "Смартфон", 12, 40000, 480000], "class": "row-even success" }
-                ]
-            },
-            "metal": {
-                "title": "Лучшие хэви метал группы",
-                "headers": ["Группа", "Страна", "Год основания", "Стиль", "Лучший альбом"],
-                "rows": [
-                    { "values": ["Metallica", "USA", 1981, "Thrash Metal", "Master of Puppets"], "class": "row-odd highlight" },
-                    { "values": ["Iron Maiden", "UK", 1975, "Heavy Metal", "The Number of the Beast"], "class": "row-even" },
-                    { "values": ["Black Sabbath", "UK", 1968, "Heavy Metal", "Paranoid"], "class": "row-odd" },
-                    { "values": ["Slayer", "USA", 1981, "Thrash Metal", "Reign in Blood"], "class": "row-even" },
-                    { "values": ["Megadeth", "USA", 1983, "Thrash Metal", "Rust in Peace"], "class": "row-odd" },
-                    { "values": ["Judas Priest", "UK", 1969, "Heavy Metal", "Painkiller"], "class": "row-even success" },
-                    { "values": ["Pantera", "USA", 1981, "Groove Metal", "Vulgar Display of Power"], "class": "row-odd warning" },
-                    { "values": ["Motorhead", "UK", 1975, "Heavy Metal", "Ace of Spades"], "class": "row-even" }
-                ]
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>HTML Table to Excel</title>
+        <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
             }
-        }
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            th,
+            td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+            .header {
+                background-color: #4caf50 !important;
+                color: white !important;
+                font-weight: bold !important;
+                text-align: center !important;
+            }
+            .row-even {
+                background-color: #f2f2f2 !important;
+            }
+            .row-odd {
+                background-color: #ffffff !important;
+            }
+            .highlight {
+                background-color: #ffeb3b !important;
+                font-weight: bold !important;
+            }
+            .warning {
+                background-color: #ff9800 !important;
+                color: white !important;
+            }
+            .success {
+                background-color: #8bc34a !important;
+                color: white !important;
+            }
+            button {
+                padding: 10px 20px;
+                background-color: #2196f3;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 16px;
+                margin: 5px;
+            }
+            button:hover {
+                background-color: #0b7dda;
+            }
+            .table-selector {
+                margin-bottom: 20px;
+                padding: 10px;
+                background-color: #f5f5f5;
+                border-radius: 4px;
+            }
+            .table-selector select {
+                padding: 8px;
+                font-size: 16px;
+                margin-right: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="table-selector">
+            <label for="tableSelect">Выберите таблицу:</label>
+            <select id="tableSelect" onchange="changeTable()">
+                <option value="sales">Отчет по продажам</option>
+                <option value="metal">Хэви метал группы</option>
+                <option value="employees">Сотрудники</option>
+                <option value="products">Товары</option>
+            </select>
+        </div>
 
-        const colorMap = {
-            'header': { bg: 'FF4CAF50', text: 'FFFFFFFF' },
-            'row-even': { bg: 'FFF2F2F2', text: 'FF000000' },
-            'row-odd': { bg: 'FFFFFFFF', text: 'FF000000' },
-            'highlight': { bg: 'FFFFEB3B', text: 'FF000000' },
-            'warning': { bg: 'FFFF9800', text: 'FFFFFFFF' },
-            'success': { bg: 'FF8BC34A', text: 'FFFFFFFF' }
-        }
+        <table id="dataTable"></table>
+        <button onclick="exportTableToExcel()">Экспорт в Excel</button>
 
-        let currentTable = 'sales';
+        <script>
+            const tables = {
+                sales: {
+                    title: "Отчет по продажам за 2024 год",
+                    headers: [
+                        "Месяц",
+                        "Товар",
+                        "Количество",
+                        "Цена за единицу",
+                        "Общая сумма",
+                    ],
+                    rows: [
+                        {
+                            values: ["Январь", "Ноутбук", 15, 50000, 750000],
+                            class: "row-odd",
+                        },
+                        {
+                            values: ["Январь", "Мышь", 45, 1500, 67500],
+                            class: "row-even",
+                        },
+                        {
+                            values: ["Февраль", "Монитор", 8, 25000, 200000],
+                            class: "row-odd",
+                        },
+                        {
+                            values: ["Февраль", "Клавиатура", 25, 3000, 75000],
+                            class: "row-even",
+                        },
+                        {
+                            values: ["Март", "Ноутбук", 22, 50000, 1100000],
+                            class: "row-odd highlight",
+                        },
+                        {
+                            values: ["Март", "Наушники", 30, 5000, 150000],
+                            class: "row-even",
+                        },
+                        {
+                            values: ["Апрель", "Планшет", 5, 35000, 175000],
+                            class: "row-odd warning",
+                        },
+                        {
+                            values: ["Апрель", "Смартфон", 12, 40000, 480000],
+                            class: "row-even success",
+                        },
+                    ],
+                },
+                metal: {
+                    title: "Лучшие хэви метал группы",
+                    headers: [
+                        "Группа",
+                        "Страна",
+                        "Год основания",
+                        "Стиль",
+                        "Лучший альбом",
+                    ],
+                    rows: [
+                        {
+                            values: [
+                                "Metallica",
+                                "USA",
+                                1981,
+                                "Thrash Metal",
+                                "Master of Puppets",
+                            ],
+                            class: "row-odd highlight",
+                        },
+                        {
+                            values: [
+                                "Iron Maiden",
+                                "UK",
+                                1975,
+                                "Heavy Metal",
+                                "The Number of the Beast",
+                            ],
+                            class: "row-even",
+                        },
+                        {
+                            values: [
+                                "Black Sabbath",
+                                "UK",
+                                1968,
+                                "Heavy Metal",
+                                "Paranoid",
+                            ],
+                            class: "row-odd",
+                        },
+                        {
+                            values: [
+                                "Slayer",
+                                "USA",
+                                1981,
+                                "Thrash Metal",
+                                "Reign in Blood",
+                            ],
+                            class: "row-even",
+                        },
+                        {
+                            values: [
+                                "Megadeth",
+                                "USA",
+                                1983,
+                                "Thrash Metal",
+                                "Rust in Peace",
+                            ],
+                            class: "row-odd",
+                        },
+                        {
+                            values: [
+                                "Judas Priest",
+                                "UK",
+                                1969,
+                                "Heavy Metal",
+                                "Painkiller",
+                            ],
+                            class: "row-even success",
+                        },
+                        {
+                            values: [
+                                "Pantera",
+                                "USA",
+                                1981,
+                                "Groove Metal",
+                                "Vulgar Display of Power",
+                            ],
+                            class: "row-odd warning",
+                        },
+                        {
+                            values: [
+                                "Motorhead",
+                                "UK",
+                                1975,
+                                "Heavy Metal",
+                                "Ace of Spades",
+                            ],
+                            class: "row-even",
+                        },
+                    ],
+                },
+                employees: {
+                    title: "Список сотрудников",
+                    headers: ["Имя", "Должность", "Отдел", "Зарплата", "Стаж"],
+                    rows: [
+                        {
+                            values: [
+                                "Иван Петров",
+                                "Разработчик",
+                                "IT",
+                                120000,
+                                3,
+                            ],
+                            class: "row-odd",
+                        },
+                        {
+                            values: [
+                                "Мария Сидорова",
+                                "Дизайнер",
+                                "Маркетинг",
+                                90000,
+                                2,
+                            ],
+                            class: "row-even",
+                        },
+                        {
+                            values: [
+                                "Алексей Козлов",
+                                "Менеджер",
+                                "Продажи",
+                                110000,
+                                4,
+                            ],
+                            class: "row-odd highlight",
+                        },
+                        {
+                            values: [
+                                "Ольга Новикова",
+                                "Аналитик",
+                                "Финансы",
+                                130000,
+                                5,
+                            ],
+                            class: "row-even",
+                        },
+                        {
+                            values: [
+                                "Дмитрий Волков",
+                                "Тестировщик",
+                                "IT",
+                                80000,
+                                1,
+                            ],
+                            class: "row-odd warning",
+                        },
+                        {
+                            values: [
+                                "Елена Смирнова",
+                                "Бухгалтер",
+                                "Финансы",
+                                100000,
+                                6,
+                            ],
+                            class: "row-even success",
+                        },
+                    ],
+                },
+                products: {
+                    title: "Каталог товаров",
+                    headers: [
+                        "Товар",
+                        "Категория",
+                        "Цена",
+                        "В наличии",
+                        "Рейтинг",
+                    ],
+                    rows: [
+                        {
+                            values: ["iPhone 15", "Смартфоны", 89990, 25, 4.8],
+                            class: "row-odd",
+                        },
+                        {
+                            values: [
+                                "Samsung Galaxy",
+                                "Смартфоны",
+                                74990,
+                                18,
+                                4.6,
+                            ],
+                            class: "row-even",
+                        },
+                        {
+                            values: [
+                                "MacBook Air",
+                                "Ноутбуки",
+                                129990,
+                                12,
+                                4.9,
+                            ],
+                            class: "row-odd highlight",
+                        },
+                        {
+                            values: [
+                                "Sony WH-1000XM4",
+                                "Наушники",
+                                29990,
+                                30,
+                                4.7,
+                            ],
+                            class: "row-even",
+                        },
+                        {
+                            values: ["iPad Pro", "Планшеты", 85990, 8, 4.5],
+                            class: "row-odd warning",
+                        },
+                        {
+                            values: ["PlayStation 5", "Консоли", 59990, 5, 4.9],
+                            class: "row-even success",
+                        },
+                        {
+                            values: ["Xbox Series X", "Консоли", 54990, 7, 4.8],
+                            class: "row-odd",
+                        },
+                        {
+                            values: [
+                                "Nintendo Switch",
+                                "Консоли",
+                                29990,
+                                15,
+                                4.4,
+                            ],
+                            class: "row-even",
+                        },
+                    ],
+                },
+            };
 
-        function changeTable() {
-            currentTable = document.getElementById('tableSelect').value;
-            generateTableFromJSON();
-        }
+            let currentTable = "sales";
 
-        function generateTableFromJSON() {
-            const data = tables[currentTable];
-            const table = document.getElementById('dataTable');
+            function changeTable() {
+                currentTable = document.getElementById("tableSelect").value;
+                generateTable();
+            }
 
-            table.innerHTML = '';
+            function generateTable() {
+                const data = tables[currentTable];
+                const table = document.getElementById("dataTable");
+                table.innerHTML = "";
 
-            const thead = document.createElement('thead');
+                const thead = document.createElement("thead");
 
-            const titleRow = document.createElement('tr');
-            titleRow.className = 'header';
-            const titleCell = document.createElement('th');
-            titleCell.colSpan = data.headers.length;
-            titleCell.textContent = data.title;
-            titleRow.appendChild(titleCell);
-            thead.appendChild(titleRow);
+                const titleRow = document.createElement("tr");
+                const titleCell = document.createElement("th");
+                titleCell.colSpan = data.headers.length;
+                titleCell.textContent = data.title;
+                titleCell.className = "header";
+                titleRow.appendChild(titleCell);
+                thead.appendChild(titleRow);
 
-            const headerRow = document.createElement('tr');
-            headerRow.className = 'header';
-            data.headers.forEach(header => {
-                const th = document.createElement('th');
-                th.textContent = header;
-                headerRow.appendChild(th);
-            });
-            thead.appendChild(headerRow);
-
-            table.appendChild(thead);
-
-            const tbody = document.createElement('tbody');
-            data.rows.forEach((row, index) => {
-                const tr = document.createElement('tr');
-
-                if (row.class) tr.className = row.class;
-                else tr.className = index % 2 === 0 ? 'row-odd' : 'row-even';
-
-                row.values.forEach(value => {
-                    const cell = document.createElement('td');
-                    cell.textContent = value;
-                    tr.appendChild(cell);
+                const headerRow = document.createElement("tr");
+                data.headers.forEach((header) => {
+                    const th = document.createElement("th");
+                    th.textContent = header;
+                    th.className = "header";
+                    headerRow.appendChild(th);
                 });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
 
-                tbody.appendChild(tr);
-            });
+                const tbody = document.createElement("tbody");
+                data.rows.forEach((row, index) => {
+                    const tr = document.createElement("tr");
+                    tr.className =
+                        row.class || (index % 2 === 0 ? "row-odd" : "row-even");
 
-            table.appendChild(tbody);
-        }
+                    row.values.forEach((value) => {
+                        const td = document.createElement("td");
+                        td.textContent = value;
+                        td.className =
+                            row.class ||
+                            (index % 2 === 0 ? "row-odd" : "row-even");
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+                table.appendChild(tbody);
+            }
 
-        async function convertTableToExcel(tableId) {
-            try {
-                const table = document.getElementById(tableId);
-                if (!table || table.rows.length === 0) {
-                    alert('Таблица не найдена или пуста');
-                    return;
+            function getComputedStyles(element) {
+                const computed = window.getComputedStyle(element);
+                return {
+                    backgroundColor: computed.backgroundColor,
+                    color: computed.color,
+                    fontWeight: computed.fontWeight,
+                    textAlign: computed.textAlign,
+                };
+            }
+
+            function rgbToHex(rgb) {
+                if (rgb.startsWith("#")) {
+                    return rgb.replace("#", "FF");
                 }
 
+                const match = rgb.match(
+                    /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)$/,
+                );
+                if (match) {
+                    const r = parseInt(match[1]);
+                    const g = parseInt(match[2]);
+                    const b = parseInt(match[3]);
+                    return (
+                        "FF" +
+                        r.toString(16).padStart(2, "0") +
+                        g.toString(16).padStart(2, "0") +
+                        b.toString(16).padStart(2, "0")
+                    );
+                }
+                return "FFFFFFFF";
+            }
+
+            async function exportTableToExcel() {
+                const table = document.getElementById("dataTable");
                 const workbook = new ExcelJS.Workbook();
                 const worksheet = workbook.addWorksheet("Данные");
 
-                const rows = Array.from(table.rows);
+                for (let i = 0; i < table.rows.length; i++) {
+                    const htmlRow = table.rows[i];
+                    const excelRow = worksheet.addRow([]);
 
-                let maxCols = 0;
-                rows.forEach(row => {
-                    const cols = Array.from(row.cells).reduce((sum, cell) => sum + (cell.colSpan || 1), 0);
-                    if (cols > maxCols) maxCols = cols;
-                });
+                    for (let j = 0; j < htmlRow.cells.length; j++) {
+                        const htmlCell = htmlRow.cells[j];
+                        const excelCell = excelRow.getCell(j + 1);
 
-                const columnWidths = Array(maxCols).fill().map(() => ({ width: 15 }));
-                worksheet.columns = columnWidths;
+                        const cellValue = htmlCell.textContent.trim();
+                        const numValue = Number(cellValue.replace(/\s/g, ""));
+                        excelCell.value = isNaN(numValue)
+                            ? cellValue
+                            : numValue;
 
-                rows.forEach((htmlRow, rowIndex) => {
-                    const excelRow = worksheet.getRow(rowIndex + 1);
-                    let colIndex = 0;
+                        const styles = getComputedStyles(htmlCell);
 
-                    const rowClasses = htmlRow.className.split(' ');
+                        if (
+                            styles.backgroundColor &&
+                            styles.backgroundColor !== "rgba(0, 0, 0, 0)"
+                        ) {
+                            excelCell.fill = {
+                                type: "pattern",
+                                pattern: "solid",
+                                fgColor: {
+                                    argb: rgbToHex(styles.backgroundColor),
+                                },
+                            };
+                        }
 
-                    Array.from(htmlRow.cells).forEach(htmlCell => {
-                        const colspan = htmlCell.colSpan || 1;
-                        const excelCell = excelRow.getCell(colIndex + 1);
-                        excelCell.value = htmlCell.textContent.trim();
+                        excelCell.font = {
+                            color: { argb: rgbToHex(styles.color) },
+                            bold:
+                                styles.fontWeight === "bold" ||
+                                styles.fontWeight === "700",
+                        };
 
-                        const cellClasses = htmlCell.className.split(' ');
-                        const allClasses = [...rowClasses, ...cellClasses];
-                        applyStylesFromClasses(excelCell, allClasses);
-
-                        const computedStyle = window.getComputedStyle(htmlCell);
                         excelCell.alignment = {
                             vertical: "middle",
-                            horizontal: computedStyle.textAlign === "center" ? "center" :
-                                computedStyle.textAlign === "right" ? "right" : "left",
+                            horizontal: styles.textAlign || "left",
                         };
 
                         excelCell.border = {
-                            top: { style: "thin", color: { argb: "FF000000" } },
-                            left: { style: "thin", color: { argb: "FF000000" } },
-                            bottom: { style: "thin", color: { argb: "FF000000" } },
-                            right: { style: "thin", color: { argb: "FF000000" } },
+                            top: { style: "thin", color: { argb: "FFDDDDDD" } },
+                            left: {
+                                style: "thin",
+                                color: { argb: "FFDDDDDD" },
+                            },
+                            bottom: {
+                                style: "thin",
+                                color: { argb: "FFDDDDDD" },
+                            },
+                            right: {
+                                style: "thin",
+                                color: { argb: "FFDDDDDD" },
+                            },
                         };
-
-                        if (colspan > 1) worksheet.mergeCells(rowIndex + 1, colIndex + 1, rowIndex + 1, colIndex + colspan);
-
-                        colIndex += colspan;
-                    });
-
-                    excelRow.height = 20;
-                    excelRow.commit();
-                });
-
-                const buffer = await workbook.xlsx.writeBuffer();
-                const blob = new Blob([buffer], {
-                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `${currentTable}_table.xlsx`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-            } catch (error) {
-                console.error("Ошибка при конвертации:", error);
-            }
-        }
-
-        function applyStylesFromClasses(excelCell, classes) {
-            let bgColor = null;
-            let textColor = null;
-            let isBold = false;
-
-            classes.forEach(className => {
-                if (colorMap[className]) {
-                    if (colorMap[className].bg && (!bgColor || className === 'highlight' || className === 'warning' || className === 'success')) bgColor = colorMap[className].bg;
-                    if (colorMap[className].text) textColor = colorMap[className].text;
+                    }
                 }
 
-                if (className === 'header' || className === 'highlight') isBold = true;
-            });
+                worksheet.columns.forEach((column) => {
+                    let maxLength = 0;
+                    column.eachCell({ includeEmpty: true }, (cell) => {
+                        const cellLength = cell.value
+                            ? cell.value.toString().length
+                            : 0;
+                        if (cellLength > maxLength) maxLength = cellLength;
+                    });
+                    column.width = Math.min(Math.max(maxLength + 2, 10), 50);
+                });
 
-            if (bgColor) excelCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: bgColor } };
-            if (textColor) excelCell.font = { ...excelCell.font, color: { argb: textColor } };
-            if (isBold) excelCell.font = { ...excelCell.font, bold: true };
-        }
+                try {
+                    const buffer = await workbook.xlsx.writeBuffer();
+                    const blob = new Blob([buffer], {
+                        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `${currentTable}_table.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } catch (error) {
+                    console.error("Ошибка при экспорте:", error);
+                    alert("Произошла ошибка при экспорте таблицы");
+                }
+            }
 
-        window.onload = generateTableFromJSON;
-    </script>
-</body>
-
+            window.onload = generateTable;
+        </script>
+    </body>
 </html>
